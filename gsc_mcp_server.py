@@ -296,6 +296,8 @@ def _classify_result(result):
                 error_category = "APIError"
         elif "metadata" in result:
             rows_returned = result.get("metadata", {}).get("total_rows", 0)
+        elif "summary" in result and isinstance(result["summary"], dict):
+            rows_returned = result["summary"].get("row_count", 0)
         elif "rows" in result and isinstance(result["rows"], list):
             rows_returned = len(result["rows"])
         elif "sites" in result and isinstance(result["sites"], list):
@@ -747,13 +749,20 @@ def _get_search_analytics_impl(
             except json.JSONDecodeError:
                 dimensions = [d.strip() for d in dimensions.split(',')]
 
-        # Validate dimensions
+        # Validate dimensions (case-insensitive & snake_case friendly)
         valid_dimensions = ["country", "device", "page", "query", "searchAppearance", "date"]
+        dim_map = {d.lower(): d for d in valid_dimensions}
+        dim_map["search_appearance"] = "searchAppearance"
+        dim_map["searchappearance"] = "searchAppearance"
         if not dimensions:
             dimensions = ["query"]
+        normalized_dims = []
         for dim in dimensions:
-            if dim not in valid_dimensions:
+            canonical = dim_map.get(str(dim).strip().lower())
+            if not canonical:
                 return {"error": f"Invalid dimension '{dim}'. Valid dimensions: {valid_dimensions}"}
+            normalized_dims.append(canonical)
+        dimensions = normalized_dims
         
         # Set default dates if not provided
         if not start_date:
@@ -772,20 +781,26 @@ def _get_search_analytics_impl(
 
             for filter_item in filters:
                 # Validate filter dimension
-                filter_dim = filter_item.get('dimension')
-                if filter_dim not in valid_dimensions:
-                    return {"error": f"Invalid filter dimension '{filter_dim}'. Valid dimensions: {valid_dimensions}"}
+                raw_dim = filter_item.get('dimension', '')
+                filter_dim = dim_map.get(str(raw_dim).strip().lower())
+                if not filter_dim:
+                    return {"error": f"Invalid filter dimension '{raw_dim}'. Valid dimensions: {valid_dimensions}"}
                 
                 request_filters.append({
                     'dimension': filter_dim,
-                    'operator': filter_item.get('operator', 'equals'),
+                    'operator': str(filter_item.get('operator', 'equals')).lower(),
                     'expression': filter_item.get('expression')
                 })
         
-        # Validate search type
+        # Validate search type (case-insensitive)
         valid_search_types = ["web", "image", "video", "news", "discover", "googleNews"]
-        if search_type not in valid_search_types:
+        type_map = {t.lower(): t for t in valid_search_types}
+        type_map["googlenews"] = "googleNews"
+        type_map["google_news"] = "googleNews"
+        canonical_type = type_map.get(str(search_type or "web").strip().lower())
+        if not canonical_type:
             return {"error": f"Invalid search_type '{search_type}'. Valid types: {valid_search_types}"}
+        search_type = canonical_type
         
         # Build the request
         request = {

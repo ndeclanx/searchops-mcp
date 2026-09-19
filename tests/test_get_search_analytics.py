@@ -171,6 +171,17 @@ class GetSearchAnalyticsRequestBodyTests(unittest.TestCase):
         self.assertEqual(result["summary"]["total_clicks"], 15)
         self.assertEqual(result["summary"]["total_impressions"], 150)
         self.assertEqual(result["summary"]["avg_ctr"], 10.0)
+        status, err_cat, rows = gsc_mcp_server._classify_result(result)
+        self.assertEqual(status, "success")
+        self.assertIsNone(err_cat)
+        self.assertEqual(rows, 2)
+
+    def test_case_insensitive_dimensions_and_search_type(self):
+        result = asyncio.run(gsc_mcp_server.get_search_analytics(
+            dimensions=["QUERY", "Page"], search_type="WEB"
+        ))
+        self.assertEqual(self.captured_body["dimensions"], ["query", "page"])
+        self.assertEqual(self.captured_body["searchType"], "web")
 
 
 class SingleRegistrationTest(unittest.TestCase):
