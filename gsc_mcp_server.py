@@ -539,6 +539,8 @@ def list_gsc_sites():
     Returns:
         List of verified sites with their permission levels.
     """
+    if SERVER_INIT_ERROR:
+        return f"Configuration Error: {SERVER_INIT_ERROR}. Please instruct the user to fix their setup."
     try:
         service = get_gsc_service()
         sites = service.sites().list().execute()
@@ -556,6 +558,17 @@ def list_gsc_sites():
         if brief:
             return {"error": brief}
         return {"error": f"Error fetching sites: {str(e)}"}
+
+@mcp.tool(annotations=_ANNOTATIONS_READ_API)
+@instrument
+def list_sites():
+    """
+    List all sites verified in Google Search Console (alias for list_gsc_sites).
+    
+    Returns:
+        List of verified sites with their permission levels.
+    """
+    return list_gsc_sites()
 
 @mcp.tool(annotations=_ANNOTATIONS_READ_LOCAL)
 @instrument

@@ -1,0 +1,40 @@
+{
+  "name": "@surendranb/google-search-console-mcp",
+  "version": "0.10.6",
+  "description": "Model Context Protocol (MCP) server for Google Search Console (GSC) inspection, search performance, and sitemaps via NPX. Spawns the Python package through uvx with full stdio passthrough.",
+  "main": "bin/index.js",
+  "bin": {
+    "google-search-console-mcp": "bin/index.js",
+    "gsc-mcp": "bin/index.js",
+    "gsc-mcp-server": "bin/index.js"
+  },
+  "scripts": {
+    "test": "node bin/index.js --help"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "google-search-console",
+    "gsc",
+    "seo",
+    "search-console",
+    "ai-agent",
+    "anthropic",
+    "claude",
+    "claude-code",
+    "cursor"
+  ],
+  "author": "Surendran B <reachsuren@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/surendranb/google-search-console-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/surendranb/google-search-console-mcp/issues"
+  },
+  "homepage": "https://gsc.builditwithai.xyz",
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

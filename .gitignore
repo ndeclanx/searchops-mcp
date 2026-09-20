@@ -68,6 +68,7 @@ venv.bak/
 !gsc_metrics.json
 !gsc_filters.json
 !claude-confing-template.json
+!npm/package.json
 *.xlsx
 *.xls
 *.db
