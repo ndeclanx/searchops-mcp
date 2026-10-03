@@ -99,7 +99,7 @@ def _spawn(env_extra=None):
     # string. Fake the config so tests never depend on the developer's real
     # GSC env; offline tools never touch the credentials file.
     home = env.get("HOME")
-    if home and not env.get("GOOGLE_APPLICATION_CREDENTIALS"):
+    if home and ("GOOGLE_APPLICATION_CREDENTIALS" not in (env_extra or {})):
         fake_creds = Path(home) / "fake_service_account.json"
         fake_creds.write_text("{}", encoding="utf-8")
         env["GOOGLE_APPLICATION_CREDENTIALS"] = str(fake_creds)

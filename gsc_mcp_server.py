@@ -3,13 +3,16 @@
 # 2026-07-28 spec, and the released decorator monkey-patch registered zero
 # tools on current fastmcp. See gsc_telemetry.py for the telemetry rationale.
 from mcp.server.mcpserver import MCPServer, Context
-from mcp.types import ToolAnnotations
+from mcp.types import ToolAnnotations, CallToolResult, TextContent
 from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials
 import os
 import sys
 import json
 import time
+import re
+import threading
+import urllib.request
 import inspect
 import functools
 import anyio.to_thread
@@ -128,6 +131,7 @@ _AUTH_401_MARKERS = (
     "401", "unauthorized", "invalid_grant", "invalid_client",
     "could not deserialize key data", "no key could be detected",
     "was not in the expected format", "invalid jwt", "malformed",
+    "unable to load pem file",
 )
 _AUTH_403_MARKERS = ("403", "permissiondenied", "permission denied", "forbidden",
                      "insufficient permission", "does not have sufficient permission")
@@ -206,6 +210,137 @@ async def _list_tools_with_telemetry():
 mcp._list_tools_orig = mcp.list_tools
 mcp.list_tools = _list_tools_with_telemetry
 
+# ---------------------------------------------------------------------------
+# Universal fleet update checker (async, non-blocking, 24h TTL, 7d re-nudge)
+# ---------------------------------------------------------------------------
+_FLEET_CACHE_FILE = Path.home() / ".cache" / "mcp_fleet_updates.json"
+_UPDATE_CHECK_TTL = 86400  # 24 hours
+_NUDGE_THROTTLE_INTERVAL = 7 * 86400  # 7 days per version
+
+
+def _parse_version(v: str) -> tuple[int, ...]:
+    try:
+        clean = re.sub(r"[^\d.]", "", v)
+        parts = tuple(int(p) for p in clean.split(".") if p.isdigit())
+        return parts if parts else (0,)
+    except Exception:
+        return (0,)
+
+
+def check_server_update(package_name: str, current_version: str, force_check: bool = False) -> dict:
+    """Checks PyPI for latest version and returns update status and instructions."""
+    now = time.time()
+    cache = {}
+    if _FLEET_CACHE_FILE.exists():
+        try:
+            cache = json.loads(_FLEET_CACHE_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+
+    entry = cache.get(package_name, {})
+    last_check = entry.get("last_checked", 0)
+    latest_version = entry.get("latest_version", current_version)
+
+    if force_check or (now - last_check > _UPDATE_CHECK_TTL):
+        try:
+            req = urllib.request.Request(
+                f"https://pypi.org/pypi/{package_name}/json",
+                headers={"User-Agent": f"{package_name}/{current_version}"},
+            )
+            with urllib.request.urlopen(req, timeout=2.5) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                latest_version = data.get("info", {}).get("version", current_version)
+                entry["latest_version"] = latest_version
+                entry["last_checked"] = now
+                cache[package_name] = entry
+                _FLEET_CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
+                tmp = _FLEET_CACHE_FILE.with_suffix(".tmp")
+                tmp.write_text(json.dumps(cache), encoding="utf-8")
+                tmp.replace(_FLEET_CACHE_FILE)
+        except Exception:
+            pass
+
+    has_update = _parse_version(latest_version) > _parse_version(current_version)
+    cmd = f"uvx --refresh {package_name}"
+    msg = (
+        f"An updated version of {package_name} is available (v{latest_version}, current: v{current_version}). "
+        f"Inform the user to run '{cmd}' to update. Do NOT attempt to run this command yourself in this session."
+        if has_update
+        else f"{package_name} is up to date (v{current_version})."
+    )
+    return {
+        "server": package_name,
+        "current_version": current_version,
+        "latest_version": latest_version,
+        "update_available": has_update,
+        "upgrade_command": cmd if has_update else None,
+        "message": msg,
+    }
+
+
+def get_upgrade_nudge(package_name: str, current_version: str) -> str:
+    """Returns in-band upgrade directive if outdated, else empty string. Non-blocking."""
+    try:
+        now = time.time()
+        cache = {}
+        if _FLEET_CACHE_FILE.exists():
+            try:
+                cache = json.loads(_FLEET_CACHE_FILE.read_text(encoding="utf-8"))
+            except Exception:
+                pass
+
+        entry = cache.get(package_name, {})
+        last_check = entry.get("last_checked", 0)
+        latest_version = entry.get("latest_version", current_version)
+        last_nudged = entry.get("last_nudged", 0)
+
+        if now - last_check > _UPDATE_CHECK_TTL:
+            def _fetch():
+                try:
+                    req = urllib.request.Request(
+                        f"https://pypi.org/pypi/{package_name}/json",
+                        headers={"User-Agent": f"{package_name}/{current_version}"},
+                    )
+                    with urllib.request.urlopen(req, timeout=1.5) as resp:
+                        data = json.loads(resp.read().decode("utf-8"))
+                        latest = data.get("info", {}).get("version", current_version)
+                        _FLEET_CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
+                        cur = json.loads(_FLEET_CACHE_FILE.read_text(encoding="utf-8")) if _FLEET_CACHE_FILE.exists() else {}
+                        cur[package_name] = {
+                            "latest_version": latest,
+                            "last_checked": time.time(),
+                            "last_nudged": cur.get(package_name, {}).get("last_nudged", 0),
+                        }
+                        tmp = _FLEET_CACHE_FILE.with_suffix(".tmp")
+                        tmp.write_text(json.dumps(cur), encoding="utf-8")
+                        tmp.replace(_FLEET_CACHE_FILE)
+                except Exception:
+                    pass
+
+            threading.Thread(target=_fetch, daemon=True).start()
+
+        if _parse_version(latest_version) > _parse_version(current_version):
+            if now - last_nudged > _NUDGE_THROTTLE_INTERVAL:
+                entry["last_nudged"] = now
+                entry["latest_version"] = latest_version
+                entry["last_checked"] = last_check
+                cache[package_name] = entry
+                try:
+                    _FLEET_CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
+                    tmp = _FLEET_CACHE_FILE.with_suffix(".tmp")
+                    tmp.write_text(json.dumps(cache), encoding="utf-8")
+                    tmp.replace(_FLEET_CACHE_FILE)
+                except Exception:
+                    pass
+                return (
+                    f"\n\n[NOTICE: An updated version of {package_name} is available (v{latest_version}, current: v{current_version}). "
+                    f"Inform the user to run 'uvx --refresh {package_name}' to update. Do NOT attempt to run this command yourself in this session.]"
+                )
+    except Exception:
+        pass
+    return ""
+
+
 # --- TELEMETRY INSTRUMENTATION ---
 # Every tool is wrapped by @instrument (applied UNDER @mcp.tool()). The wrapper
 # reads the connected client's identity from the per-request `ctx` (dual-era:
@@ -240,7 +375,7 @@ def _result_chars(result):
         return len(str(result))
 
 
-_INIT_ERROR_EXEMPT = {"setup_gsc_access", "list_gsc_sites", "skills_list"}
+_INIT_ERROR_EXEMPT = {"setup_gsc_access", "list_gsc_sites", "skills_list", "check_for_updates"}
 
 # Tools that recover in-place (S7): when the config is born-broken AND the
 # client can be prompted, the intercept steps aside and the tool body runs the
@@ -396,6 +531,14 @@ def instrument(func):
                     return result
                 result = await func(*w_args, **w_kwargs)
                 status, error_category, rows_returned = _classify_result(result)
+                nudge = get_upgrade_nudge("google-search-console-mcp", MCP_SERVER_VERSION)
+                if nudge and status == "success" and func.__name__ != "check_for_updates":
+                    if isinstance(result, dict):
+                        result["_upgrade_notice"] = nudge.strip()
+                    elif isinstance(result, CallToolResult):
+                        result.content.append(TextContent(type="text", text=nudge))
+                    elif isinstance(result, str):
+                        result = result + nudge
                 return result
             except Exception as e:
                 status, error_category = "exception", e.__class__.__name__
@@ -427,6 +570,14 @@ def instrument(func):
                     return result
                 result = func(*w_args, **w_kwargs)
                 status, error_category, rows_returned = _classify_result(result)
+                nudge = get_upgrade_nudge("google-search-console-mcp", MCP_SERVER_VERSION)
+                if nudge and status == "success" and func.__name__ != "check_for_updates":
+                    if isinstance(result, dict):
+                        result["_upgrade_notice"] = nudge.strip()
+                    elif isinstance(result, CallToolResult):
+                        result.content.append(TextContent(type="text", text=nudge))
+                    elif isinstance(result, str):
+                        result = result + nudge
                 return result
             except Exception as e:
                 status, error_category = "exception", e.__class__.__name__
@@ -1055,6 +1206,18 @@ def delete_sitemap(sitemap_url: str):
         if brief:
             return {"error": brief}
         return {"error": f"Error deleting sitemap: {str(e)}"}
+
+
+@mcp.tool(
+    name="check_for_updates",
+    description="Check PyPI for newer versions of this MCP server and get upgrade instructions.",
+    annotations=_ANNOTATIONS_READ_LOCAL,
+)
+@instrument
+def check_for_updates() -> dict:
+    """Check PyPI for newer versions of google-search-console-mcp."""
+    return check_server_update("google-search-console-mcp", MCP_SERVER_VERSION, force_check=True)
+
 
 # --- S5: skills mirrored as MCP resources (Protocol Surfaces v1) ---
 # Same content as skill_read (local packaged file), discoverable without a
