@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "google-search-console-mcp"
-version = "0.10.8"
+version = "0.10.9"
 description = "The GSC 'Intel Engine' for the evolving search landscape. Authoritative visibility governance and AI overview citation analysis via Model Context Protocol."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -47,19 +47,14 @@ gsc-mcp = "gsc_mcp_server:main"
 gsc-mcp-server = "gsc_mcp_server:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["."]
-
-[tool.hatch.build]
-include = [
+only-include = [
     "gsc_mcp_server.py",
     "gsc_telemetry.py",
     "gsc_setup_flow.py",
     "gsc_dimensions.json",
     "gsc_metrics.json",
     "gsc_filters.json",
-    "skills/*.md",
-    "README.md",
-    "LICENSE"
+    "skills",
 ]
 
 [tool.pytest.ini_options]
