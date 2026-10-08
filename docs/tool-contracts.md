@@ -59,13 +59,27 @@
 - **Quota:** 2,000 calls/day (in-memory, configurable via `SEARCHOPS_INSPECT_QUOTA_DAILY`)
 - **Returns:** Index status verdict, coverage state, robots.txt state, indexing state, crawl info, canonical URLs, rich results, AMP status
 
+### `get_audit_summary`
+- **Type:** Read-only, idempotent, local (no API call)
+- **Parameters:** audit_id (optional), audit_type (optional)
+- **Returns:** Audit metadata + findings counts by severity
+- **Note:** If audit_id omitted, uses the latest audit
+
+### `get_audit_issues`
+- **Type:** Read-only, idempotent, local (no API call)
+- **Parameters:** audit_id (optional), severity (optional min filter), limit (default 20, max 100), offset
+- **Returns:** Findings list + pagination metadata
+- **Note:** severity="HIGH" returns CRITICAL + HIGH findings
+
+### `get_issue`
+- **Type:** Read-only, idempotent, local (no API call)
+- **Parameters:** finding_id (required)
+- **Returns:** Full finding dict with parsed evidence JSON
+
 ## Future Tools (Planned)
 
 | Tool | Milestone | Purpose |
 |------|-----------|---------|
-| `get_audit_summary` | M5 | Retrieve audit summary |
-| `get_audit_issues` | M5 | Query audit findings with pagination |
-| `get_issue` | M5 | Single issue with evidence |
 | `find_search_opportunities` | M6 | CTR/near-page-one/rising queries |
 | `detect_traffic_decay` | M7 | Period-over-period decline detection |
 | `detect_cannibalization` | M8 | Multi-page query overlap |

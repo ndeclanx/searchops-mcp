@@ -78,6 +78,7 @@ import searchops.tools.gsc       # noqa: E402,F401
 import searchops.tools.schema    # noqa: E402,F401
 import searchops.tools.skills    # noqa: E402,F401
 import searchops.tools.updates   # noqa: E402,F401
+import searchops.tools.audit     # noqa: E402,F401
 import searchops.prompts         # noqa: E402,F401
 import searchops.resources       # noqa: E402,F401
 

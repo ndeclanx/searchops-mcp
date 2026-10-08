@@ -1,10 +1,10 @@
 # Implementation Status — SearchOps MCP
 
 ## Current Phase
-**Phase 3 — Persistence Layer** (IN PROGRESS)
+**Phase 4 — Analysis Tools** (IN PROGRESS)
 
 ## Current Milestone
-**Milestone 4: SQLite Database Layer** (`feat/sqlite-persistence`) — COMPLETE
+**Milestone 5: Audit Framework and Query Tools** (`feat/audit-framework`) — COMPLETE
 
 ## Completed Milestones
 - **M0: Fork Stabilization** (`chore/fork-stabilization`)
@@ -12,9 +12,9 @@
 - **M2: GSC Provider Abstraction** (`refactor/gsc-provider`)
 - **M3: Implement `inspect_url` Tool** (`feat/inspect-url`)
 - **M4: SQLite Database Layer** (`feat/sqlite-persistence`)
+- **M5: Audit Framework and Query Tools** (`feat/audit-framework`)
 
 ## Pending Milestones
-- M5: Audit Framework and Query Tools (`feat/audit-framework`)
 - M6: CTR Opportunities and Near-Page-One (`feat/search-opportunities`)
 - M7: Traffic Decay Detection (`feat/traffic-decay`)
 - M8: Cannibalization Detection (`feat/cannibalization`)
@@ -38,13 +38,14 @@ None.
 - M2: All GSC API calls now go through `GSCProvider` class in `searchops/providers/gsc.py`. Tools no longer call `auth.get_gsc_service()` directly.
 - M3: `inspect_url` uses in-memory quota limiter (default 2,000/day, configurable via `SEARCHOPS_INSPECT_QUOTA_DAILY`). Resets at midnight server time; does not persist across restarts.
 - M4: SQLite database at `~/.searchops/searchops.db` (override with `SEARCHOPS_DB_PATH`). WAL mode, forward-only migrations, lazy initialization (DB file not created until first tool that needs it).
+- M5: `AuditManager` in `searchops/audit.py` manages audit lifecycle (create → add findings → complete/fail). Severity filtering returns findings at or above a threshold (e.g. `severity="HIGH"` returns CRITICAL + HIGH). Three read-only MCP tools for querying (`get_audit_summary`, `get_audit_issues`, `get_issue`).
 
 ## Known Technical Debt
 - `gsc_setup_flow.py` still imports `gsc_mcp_server as server` (preserved via shim for backward compatibility).
 
 ## Current Test Status
-- **Post-M3:** 59 passed, 2 failed (pre-existing Windows E2E failures, unchanged from M0 baseline)
-- Unit tests: 42 passed (search analytics: 6, setup flow: 7, updates: 5, imports: 12, provider: 14, inspect_url: 7)
+- **Post-M5:** 98 unit tests passed, 2 E2E failed (pre-existing Windows baseline)
+- Unit tests: 98 passed (search analytics: 6, setup flow: 7, updates: 5, imports: 12, provider: 14, inspect_url: 7, database: 23, audit: 25)
 - E2E tests: 6 passed, 2 failed (Windows `Path.home()` doesn't use `HOME` env var — `test_telemetry_events_flow`, `test_first_run_disclosure`)
 
 ## Current Public MCP Tools
@@ -60,6 +61,9 @@ None.
 10. `skill_read` — Load playbook
 11. `setup_gsc_access` — Interactive setup
 12. `check_for_updates` — Version check
+13. `get_audit_summary` — Audit summary with severity breakdown
+14. `get_audit_issues` — Query audit findings with pagination
+15. `get_issue` — Single finding with full evidence
 
 ## Next Recommended Milestone
-M5: Audit Framework and Query Tools (`feat/audit-framework`)
+M6: CTR Opportunities and Near-Page-One (`feat/search-opportunities`)

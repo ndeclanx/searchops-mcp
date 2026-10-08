@@ -108,6 +108,10 @@ _ATTR_MAP = {
     "skill_read": "searchops.tools.skills",
     # searchops.tools.updates
     "check_for_updates": "searchops.tools.updates",
+    # searchops.tools.audit
+    "get_audit_summary": "searchops.tools.audit",
+    "get_audit_issues": "searchops.tools.audit",
+    "get_issue": "searchops.tools.audit",
     # searchops.prompts
     "analyze_brand_visibility": "searchops.prompts",
     "content_opportunities": "searchops.prompts",
