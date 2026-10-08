@@ -42,8 +42,7 @@ A production MCP server for **Google Search Console (GSC)**. It provides direct 
 ### Primary Tools Available:
 - `get_search_analytics`: Query organic clicks, impressions, CTR, and average position grouped by query, page, country, device, and date.
 - `list_sites`: List all verified properties accessible to the service account.
-- `inspect_url`: Real-time URL indexing status, crawl issues, canonicalization, and mobile usability check.
-- `list_sitemaps`, `submit_sitemap`, `delete_sitemap`: Manage XML sitemaps.
+- `get_sitemaps` / `list_sitemaps`, `submit_sitemap`, `delete_sitemap`: Manage XML sitemaps.
 - `skill_read` / `skills_list`: Load built-in SEO diagnostic playbooks.
 
 ---
@@ -72,8 +71,8 @@ If credentials are not yet configured, guide the human with these steps:
 2. **Dimension Constraints**:
    - Allowed dimensions in `get_search_analytics`: `['query', 'page', 'country', 'device', 'date', 'searchAppearance']`.
    - Max row limit is 25,000. Default to 1,000 to conserve context tokens.
-3. **URL Inspection Quota**:
-   - `inspect_url` calls the live Inspection API which has a strict daily quota of 2,000 calls per day. Use it surgically for single URLs, not in a broad loop.
+3. **URL Inspection** (planned):
+   - URL Inspection API has a strict daily quota of 2,000 calls per day. The `inspect_url` tool will be added in a future milestone.
 
 ---
 

@@ -14,8 +14,9 @@
 ## Phase 2: Citation & Reference Intelligence
 - [x] **Signal: Citation Attribution Audit:**
     - Implement `identify_citation_opportunities()` identifying "Reference-Only" pages (High Pos / Low CTR).
-- [x] **Signal: Technical Citation Health:**
+- [ ] **Signal: Technical Citation Health:**
     - Integrate `inspect_url()` and `get_technical_citation_audit()` to provide technical health overlays.
+    - *Note: `inspect_url` tool not yet implemented — planned for SearchOps M3.*
 
 ## Phase 3: Brand & Authority Governance
 - [x] **Signal: Brand Retention Audit:**
