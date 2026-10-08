@@ -12,7 +12,7 @@ from typing_extensions import TypedDict
 
 from gsc_telemetry import request_supports_elicitation
 from searchops import errors
-from searchops import auth
+from searchops.providers import gsc_provider
 from searchops.instrument import instrument, fire_skill_tip, _classify_result
 from searchops.server import mcp, _ANNOTATIONS_READ_API, _ANNOTATIONS_WRITE_API, _ANNOTATIONS_DELETE_API
 
@@ -77,17 +77,7 @@ def list_gsc_sites():
     if errors.SERVER_INIT_ERROR:
         return f"Configuration Error: {errors.SERVER_INIT_ERROR}. Please instruct the user to fix their setup."
     try:
-        service = auth.get_gsc_service()
-        sites = service.sites().list().execute()
-
-        result = []
-        for site in sites.get('siteEntry', []):
-            result.append({
-                'siteUrl': site['siteUrl'],
-                'permissionLevel': site['permissionLevel']
-            })
-
-        return result
+        return gsc_provider.list_sites()
     except Exception as e:
         brief = errors._api_error_text(e, "listing verified sites")
         if brief:
@@ -120,11 +110,10 @@ def get_sitemaps():
         List of sitemaps with their status and details.
     """
     try:
-        service = auth.get_gsc_service()
-        sitemaps = service.sitemaps().list(siteUrl=errors.GSC_SITE_URL).execute()
+        raw_sitemaps = gsc_provider.get_sitemaps(errors.GSC_SITE_URL)
 
         result = []
-        for sitemap in sitemaps.get('sitemap', []):
+        for sitemap in raw_sitemaps:
             result.append({
                 'path': sitemap.get('path'),
                 'lastSubmitted': sitemap.get('lastSubmitted'),
@@ -170,12 +159,7 @@ def submit_sitemap(sitemap_url: str):
         Success message or error details.
     """
     try:
-        service = auth.get_gsc_service()
-        service.sitemaps().submit(
-            siteUrl=errors.GSC_SITE_URL,
-            feedpath=sitemap_url
-        ).execute()
-
+        gsc_provider.submit_sitemap(errors.GSC_SITE_URL, sitemap_url)
         return {"success": f"Sitemap submitted successfully: {sitemap_url}"}
 
     except Exception as e:
@@ -198,12 +182,7 @@ def delete_sitemap(sitemap_url: str):
         Success message or error details.
     """
     try:
-        service = auth.get_gsc_service()
-        service.sitemaps().delete(
-            siteUrl=errors.GSC_SITE_URL,
-            feedpath=sitemap_url
-        ).execute()
-
+        gsc_provider.delete_sitemap(errors.GSC_SITE_URL, sitemap_url)
         return {"success": f"Sitemap deleted successfully: {sitemap_url}"}
 
     except Exception as e:
@@ -321,11 +300,7 @@ def _get_search_analytics_impl(
             }]
 
         # Execute the request
-        service = auth.get_gsc_service()
-        response = service.searchanalytics().query(
-            siteUrl=errors.GSC_SITE_URL,
-            body=request
-        ).execute()
+        response = gsc_provider.search_analytics(errors.GSC_SITE_URL, request)
 
         rows = response.get('rows', [])
 

@@ -28,6 +28,7 @@ import searchops.errors   # noqa: E402
 import searchops.auth     # noqa: E402
 import searchops.instrument  # noqa: E402
 import searchops.updates  # noqa: E402
+import searchops.providers  # noqa: E402
 
 # Re-export the MCPServer instance eagerly so ``server.mcp.tool(...)`` in
 # gsc_setup_flow.py can find it during that module's import.
@@ -82,6 +83,8 @@ _ATTR_MAP = {
     "_parse_version": "searchops.updates",
     "check_server_update": "searchops.updates",
     "get_upgrade_nudge": "searchops.updates",
+    # searchops.providers
+    "gsc_provider": "searchops.providers",
     # searchops.tools.gsc
     "SearchAnalyticsResult": "searchops.tools.gsc",
     "_coerce_int": "searchops.tools.gsc",

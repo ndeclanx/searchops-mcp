@@ -59,6 +59,8 @@ def test_searchops_package_importable():
     import searchops.updates
     import searchops.prompts
     import searchops.resources
+    import searchops.providers
+    import searchops.providers.gsc
     import searchops.tools.gsc
     import searchops.tools.schema
     import searchops.tools.skills
@@ -128,3 +130,10 @@ def test_same_mcp_instance():
     import gsc_mcp_server
     import searchops.server
     assert gsc_mcp_server.mcp is searchops.server.mcp
+
+
+def test_shim_delegates_gsc_provider():
+    """gsc_provider is accessible from the shim."""
+    import gsc_mcp_server
+    import searchops.providers
+    assert gsc_mcp_server.gsc_provider is searchops.providers.gsc_provider
