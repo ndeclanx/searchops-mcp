@@ -175,7 +175,7 @@ async def test_telemetry_events_flow(tmp_path):
     """Fresh install: boot events + tool events reach the gateway, PII-free."""
     capture = CaptureServer()
     try:
-        params = _spawn({"HOME": str(tmp_path), "GSC_MCP_TELEMETRY_URL": capture.url})
+        params = _spawn({"HOME": str(tmp_path), "GSC_MCP_TELEMETRY_URL": capture.url, "GSC_MCP_TELEMETRY": "true"})
         names, dims, skills, skill = await _connect_and_run(params)
         assert "get_search_analytics" in names
 
@@ -242,13 +242,14 @@ async def test_telemetry_events_flow(tmp_path):
 
 
 async def test_telemetry_opt_out(tmp_path):
-    """Opt-out env var: the server boots and works, but nothing is sent."""
+    """Telemetry is off by default (opt-in model): the server boots and works,
+    but nothing is sent when GSC_MCP_TELEMETRY is not explicitly set to true."""
     capture = CaptureServer()
     try:
+        # No GSC_MCP_TELEMETRY in env_extra — telemetry should be off by default.
         params = _spawn({
             "HOME": str(tmp_path),
             "GSC_MCP_TELEMETRY_URL": capture.url,
-            "GSC_MCP_TELEMETRY": "false",
         })
         names, dims, skills, skill = await _connect_and_run(params)
         assert "get_search_analytics" in names
@@ -273,7 +274,7 @@ async def test_protocol_surfaces_legacy_era(tmp_path):
 
     capture = CaptureServer()
     try:
-        params = _spawn({"HOME": str(tmp_path), "GSC_MCP_TELEMETRY_URL": capture.url})
+        params = _spawn({"HOME": str(tmp_path), "GSC_MCP_TELEMETRY_URL": capture.url, "GSC_MCP_TELEMETRY": "true"})
         async with stdio_client(params) as (read, write):
             async with ClientSession(read, write) as session:
                 await session.initialize()
@@ -405,7 +406,7 @@ async def test_setup_recovery_elicitation(tmp_path):
         env.update(os.environ)
         env["HOME"] = str(tmp_path)
         env["GSC_MCP_TELEMETRY_URL"] = capture.url
-        env.pop("GSC_MCP_TELEMETRY", None)
+        env["GSC_MCP_TELEMETRY"] = "true"
         env.pop("GOOGLE_APPLICATION_CREDENTIALS", None)
         env.pop("GSC_SITE_URL", None)
         params = StdioServerParameters(
@@ -451,7 +452,7 @@ async def test_setup_brief_unchanged_without_elicitation(tmp_path):
         env.update(os.environ)
         env["HOME"] = str(tmp_path)
         env["GSC_MCP_TELEMETRY_URL"] = capture.url
-        env.pop("GSC_MCP_TELEMETRY", None)
+        env["GSC_MCP_TELEMETRY"] = "true"
         env.pop("GOOGLE_APPLICATION_CREDENTIALS", None)
         env.pop("GSC_SITE_URL", None)
         params = StdioServerParameters(
@@ -482,7 +483,7 @@ async def test_first_run_disclosure(tmp_path):
         env.update(os.environ)
         env["HOME"] = str(tmp_path)
         env["GSC_MCP_TELEMETRY_URL"] = capture.url
-        env.pop("GSC_MCP_TELEMETRY", None)
+        env["GSC_MCP_TELEMETRY"] = "true"
         proc = subprocess.Popen(
             [sys.executable, "-m", "gsc_mcp_server"],
             stdin=subprocess.DEVNULL, stderr=subprocess.PIPE, env=env, text=True,

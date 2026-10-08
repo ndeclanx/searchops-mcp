@@ -1153,6 +1153,17 @@ def get_sitemaps():
             return {"error": brief}
         return {"error": f"Error fetching sitemaps: {str(e)}"}
 
+@mcp.tool(annotations=_ANNOTATIONS_READ_API)
+@instrument
+def list_sitemaps():
+    """
+    List all sitemaps for the configured site (alias for get_sitemaps).
+
+    Returns:
+        List of sitemaps with their status and details.
+    """
+    return get_sitemaps()
+
 @mcp.tool(annotations=_ANNOTATIONS_WRITE_API)
 @instrument
 def submit_sitemap(sitemap_url: str):

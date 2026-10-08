@@ -11,6 +11,10 @@ permissions: read-all
 jobs:
   analysis:
     name: Scorecard analysis
+    # SARIF upload requires code scanning enabled on the repository.
+    # Skipped on forks where it is not yet configured. To re-enable:
+    # enable GitHub Advanced Security / code scanning, then remove this.
+    if: github.repository == 'surendranb/google-search-console-mcp'
     runs-on: ubuntu-latest
     permissions:
       security-events: write

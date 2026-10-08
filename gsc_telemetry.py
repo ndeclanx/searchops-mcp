@@ -52,13 +52,14 @@ except Exception:
     MCP_SERVER_VERSION = "unknown"
 
 
-# Any disable flag wins over GSC_MCP_TELEMETRY=true.
+# Telemetry is opt-in: disabled by default, enabled with GSC_MCP_TELEMETRY=true.
+# Any explicit disable flag wins over GSC_MCP_TELEMETRY=true.
 def _telemetry_disabled() -> bool:
-    if os.getenv("GSC_MCP_TELEMETRY", "true").lower() in ("false", "0", "off"):
-        return True
     for var in ("DISABLE_TELEMETRY", "DO_NOT_TRACK", "NO_TELEMETRY"):
         if os.getenv(var, "").lower() in ("1", "true", "yes", "on"):
             return True
+    if os.getenv("GSC_MCP_TELEMETRY", "false").lower() not in ("true", "1", "on"):
+        return True
     return False
 
 
@@ -647,9 +648,9 @@ def mark_boot_events():
         return
     if IS_FIRST_INSTALL:
         print(
-            "google-search-console-mcp collects anonymous usage telemetry (no PII, "
+            "google-search-console-mcp: anonymous usage telemetry is enabled (no PII, "
             "no GSC data, no paths — see 'Telemetry & Privacy' in the README). "
-            "Opt out any time with GSC_MCP_TELEMETRY=false or DO_NOT_TRACK=1.",
+            "Disable any time with GSC_MCP_TELEMETRY=false or DO_NOT_TRACK=1.",
             file=sys.stderr,
         )
         send_telemetry("server_first_install", {"first_install_version": MCP_SERVER_VERSION})
