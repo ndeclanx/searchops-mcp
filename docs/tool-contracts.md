@@ -107,12 +107,22 @@
 - **Returns:** Parsed URLs or child sitemaps, type (sitemap/sitemapindex), validation findings
 - **Note:** Validates URL count (50k limit), domain mismatches, missing lastmod
 
+### `analyze_url`
+- **Type:** Read-only, idempotent, open-world
+- **Parameters:** url (required), site_url (optional)
+- **Returns:** Page metadata (title, meta_description, canonical, h1, word_count), links, findings
+- **Note:** Checks for missing title, meta description, H1, thin content, HTTP errors
+
+### `crawl_site`
+- **Type:** Read-only, idempotent, open-world
+- **Parameters:** start_url (optional, defaults to GSC_SITE_URL), site_url (optional), max_pages (default 50, max 500), max_depth (default 3, max 10), respect_robots (default true)
+- **Returns:** Summary with audit_id, pages_crawled, links_found, findings_count
+- **Note:** BFS crawler, stores pages/links in SQLite, detects orphan pages
+
 ## Future Tools (Planned)
 
 | Tool | Milestone | Purpose |
 |------|-----------|---------|
-| `crawl_site` | M10 | Site crawling |
-| `analyze_url` | M10 | Single-page analysis |
 | `audit_indexing` | M11 | Full indexing audit |
 | `compare_audits` | M12 | Audit-to-audit diff |
 | `analyze_performance` | M13 | PageSpeed Insights |
