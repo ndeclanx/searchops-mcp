@@ -76,11 +76,17 @@
 - **Parameters:** finding_id (required)
 - **Returns:** Full finding dict with parsed evidence JSON
 
+### `find_search_opportunities`
+- **Type:** Read-only (GSC API), idempotent, open-world
+- **Parameters:** site_url (optional), start_date, end_date, row_limit (default 5000), low_ctr_threshold (default 2.0%), near_page_one_max_position (default 20.0)
+- **Returns:** Summary with audit_id, total_opportunities, per-type counts, rows_analyzed
+- **Note:** Creates an audit with findings persisted in SQLite. Query results via `get_audit_issues`.
+- **Opportunity types:** low-ctr (pos < 10, CTR < 2%), near-page-one (pos 5-20), citation-opportunity (pos ≤ 1.5, CTR < 1%)
+
 ## Future Tools (Planned)
 
 | Tool | Milestone | Purpose |
 |------|-----------|---------|
-| `find_search_opportunities` | M6 | CTR/near-page-one/rising queries |
 | `detect_traffic_decay` | M7 | Period-over-period decline detection |
 | `detect_cannibalization` | M8 | Multi-page query overlap |
 | `analyze_robots_txt` | M9 | Parse robots.txt |

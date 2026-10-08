@@ -112,6 +112,8 @@ _ATTR_MAP = {
     "get_audit_summary": "searchops.tools.audit",
     "get_audit_issues": "searchops.tools.audit",
     "get_issue": "searchops.tools.audit",
+    # searchops.tools.opportunities
+    "find_search_opportunities": "searchops.tools.opportunities",
     # searchops.prompts
     "analyze_brand_visibility": "searchops.prompts",
     "content_opportunities": "searchops.prompts",
