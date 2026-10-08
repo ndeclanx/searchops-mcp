@@ -131,9 +131,14 @@
 - **Returns:** Summary with new/resolved/persistent counts, severity breakdowns, detailed finding lists
 - **Note:** Matches findings by finding_type+url. Detects severity changes on persistent findings.
 
+### `analyze_performance`
+- **Type:** Read-only, idempotent, open-world
+- **Parameters:** url (required), strategy (default "mobile")
+- **Returns:** Performance score, Core Web Vitals (field + lab data), findings
+- **Note:** Uses free PageSpeed Insights API (no auth required). Optional GOOGLE_API_KEY env var for higher rate limits.
+
 ## Future Tools (Planned)
 
 | Tool | Milestone | Purpose |
 |------|-----------|---------|
-| `analyze_performance` | M13 | PageSpeed Insights |
 | `verify_issue` | M14 | Issue fix verification |
