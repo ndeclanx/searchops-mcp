@@ -87,6 +87,7 @@ import searchops.tools.crawler        # noqa: E402,F401
 import searchops.tools.indexing       # noqa: E402,F401
 import searchops.tools.comparison    # noqa: E402,F401
 import searchops.tools.pagespeed    # noqa: E402,F401
+import searchops.tools.verification  # noqa: E402,F401
 import searchops.prompts         # noqa: E402,F401
 import searchops.resources       # noqa: E402,F401
 

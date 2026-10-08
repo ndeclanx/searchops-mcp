@@ -137,8 +137,8 @@
 - **Returns:** Performance score, Core Web Vitals (field + lab data), findings
 - **Note:** Uses free PageSpeed Insights API (no auth required). Optional GOOGLE_API_KEY env var for higher rate limits.
 
-## Future Tools (Planned)
-
-| Tool | Milestone | Purpose |
-|------|-----------|---------|
-| `verify_issue` | M14 | Issue fix verification |
+### `verify_issue`
+- **Type:** Read-only, idempotent, open-world
+- **Parameters:** finding_id (required)
+- **Returns:** Verification result with resolved (true/false/null), reason, finding metadata
+- **Note:** Supports automatic verification for on-page SEO findings (title, meta, H1, content, HTTP errors). Other types return manual verification required.

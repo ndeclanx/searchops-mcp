@@ -130,6 +130,8 @@ _ATTR_MAP = {
     "compare_audits": "searchops.tools.comparison",
     # searchops.tools.pagespeed
     "analyze_performance": "searchops.tools.pagespeed",
+    # searchops.tools.verification
+    "verify_issue": "searchops.tools.verification",
     # searchops.prompts
     "analyze_brand_visibility": "searchops.prompts",
     "content_opportunities": "searchops.prompts",
