@@ -72,3 +72,32 @@ Work this way:
 7. Report the drop's shape, the losing segment, and the most likely cause class — with the numbers that support it.
 
 Quirks to respect: GSC data lags about 3 days — never include the last 3 days in either window; ctr is already a percentage; position is an average where lower is better."""
+
+
+@mcp.prompt(name="site-health-diagnostic", title="Run site health diagnostic",
+            description="Comprehensive SEO health audit: crawl, indexing, performance, opportunities, and traffic trends.")
+def site_health_diagnostic(site_url: str = "") -> str:
+    _prompt_used("site-health-diagnostic", bool(site_url))
+    site = f"Site: {site_url.strip()}\n" if site_url.strip() else ""
+    return f"""Run a comprehensive site health diagnostic using all available SearchOps tools.
+{site}
+Work this way:
+1. Call skill_read("site_health_diagnostic.md") first — it has the full Hermes diagnostic playbook with all phases.
+2. **Phase 1 — Crawl Infrastructure:**
+   a. Call analyze_robots_txt() to check for robots.txt issues.
+   b. If sitemap URLs are found, call parse_sitemap() for each.
+   c. Call crawl_site(max_pages=50) to discover page-level issues.
+3. **Phase 2 — Indexing Intelligence:**
+   a. Call audit_indexing(crawl_audit_id=<id from step 2c>) to check index coverage.
+4. **Phase 3 — Search Performance:**
+   a. Call find_search_opportunities() for CTR and near-page-one opportunities.
+   b. Call detect_traffic_decay_tool() for declining queries.
+   c. Call detect_cannibalization_tool() for keyword cannibalization.
+5. **Phase 4 — Page Performance:**
+   a. Call analyze_performance(url=<homepage>) for Core Web Vitals.
+   b. Optionally test 2-3 other important pages.
+6. **Phase 5 — Synthesis:**
+   a. Use get_audit_issues(severity="HIGH") for each audit to compile a priority list.
+   b. Report findings grouped by severity: CRITICAL > HIGH > MEDIUM > LOW.
+
+Present a structured report with sections for each phase, issue counts by severity, and prioritized action items."""

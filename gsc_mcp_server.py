@@ -136,6 +136,7 @@ _ATTR_MAP = {
     "analyze_brand_visibility": "searchops.prompts",
     "content_opportunities": "searchops.prompts",
     "diagnose_traffic_drop": "searchops.prompts",
+    "site_health_diagnostic": "searchops.prompts",
 }
 
 

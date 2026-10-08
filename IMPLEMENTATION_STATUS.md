@@ -4,7 +4,7 @@
 **Phase 4 — Analysis Tools** (IN PROGRESS)
 
 ## Current Milestone
-**Milestone 14: Verification Tool** (`feat/verification`) — COMPLETE
+**Milestone 15: SearchOps Hermes Skill** (`feat/searchops-skill`) — COMPLETE
 
 ## Completed Milestones
 - **M0: Fork Stabilization** (`chore/fork-stabilization`)
@@ -22,9 +22,9 @@
 - **M12: Historical Comparison** (`feat/audit-comparison`)
 - **M13: PageSpeed Integration** (`feat/pagespeed`)
 - **M14: Verification Tool** (`feat/verification`)
+- **M15: SearchOps Hermes Skill** (`feat/searchops-skill`)
 
 ## Pending Milestones
-- M15: SearchOps Hermes Skill (`feat/searchops-skill`)
 - M16: n8n Webhook Integration (`feat/n8n-automation`)
 
 ## Blocked Work
@@ -48,13 +48,14 @@ None.
 - M12: `compare_audits` diffs two audits to find new, resolved, and persistent findings. Matches by finding_type+url key. Detects severity changes on persistent findings. Local-only (reads from DB, no API calls).
 - M13: `analyze_performance` queries Google PageSpeed Insights API (free, no auth required). Returns Lighthouse score, Core Web Vitals (field + lab data). Flags poor performance (<50), slow LCP (>4s), high CLS (>0.25), high TBT (>600ms). Supports optional GOOGLE_API_KEY for rate limit increase.
 - M14: `verify_issue` re-checks a previously found issue by re-fetching the page and re-parsing HTML. Supports automatic verification for on-page SEO findings (missing title, meta, H1, thin content, HTTP errors). Unsupported types return manual verification required.
+- M15: `site_health_diagnostic` Hermes skill — comprehensive 5-phase SEO diagnostic playbook (crawl infrastructure → indexing → search performance → page performance → synthesis). Exposed as skill file + workflow prompt. Orchestrates all 26 analysis tools in a structured sequence.
 
 ## Known Technical Debt
 - `gsc_setup_flow.py` still imports `gsc_mcp_server as server` (preserved via shim for backward compatibility).
 
 ## Current Test Status
-- **Post-M14:** 275 unit tests passed, 2 E2E failed (pre-existing Windows baseline)
-- Unit tests: 275 passed (search analytics: 6, setup flow: 7, updates: 5, imports: 12, provider: 14, inspect_url: 7, database: 23, audit: 25, opportunities: 28, traffic_decay: 13, cannibalization: 11, crawl_parsers: 32, crawler: 30, indexing: 22, comparison: 13, pagespeed: 15, verification: 13)
+- **Post-M15:** 285 unit tests passed, 2 E2E failed (pre-existing Windows baseline)
+- Unit tests: 285 passed (search analytics: 6, setup flow: 7, updates: 5, imports: 12, provider: 14, inspect_url: 7, database: 23, audit: 25, opportunities: 28, traffic_decay: 13, cannibalization: 11, crawl_parsers: 32, crawler: 30, indexing: 22, comparison: 13, pagespeed: 15, verification: 13, hermes_skill: 10)
 - E2E tests: 6 passed, 2 failed (Windows `Path.home()` doesn't use `HOME` env var — `test_telemetry_events_flow`, `test_first_run_disclosure`)
 
 ## Current Public MCP Tools
@@ -85,5 +86,8 @@ None.
 25. `analyze_performance` — PageSpeed Insights performance analysis
 26. `verify_issue` — Re-check whether a found issue has been resolved
 
+## MCP Prompts (Workflow Orchestrators)
+1. `site_health_diagnostic` — 5-phase SEO diagnostic workflow prompt (Hermes)
+
 ## Next Recommended Milestone
-M15: SearchOps Hermes Skill (`feat/searchops-skill`)
+M16: n8n Webhook Integration (`feat/n8n-automation`)
