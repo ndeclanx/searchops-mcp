@@ -1,18 +1,18 @@
 # Implementation Status — SearchOps MCP
 
 ## Current Phase
-**Phase 1 — Controlled Refactoring** (IN PROGRESS)
+**Phase 2 — Missing GSC Features** (IN PROGRESS)
 
 ## Current Milestone
-**Milestone 1: Extract Modular Package Structure** (`refactor/modular-package`) — COMPLETE
+**Milestone 3: Implement `inspect_url` Tool** (`feat/inspect-url`) — COMPLETE
 
 ## Completed Milestones
 - **M0: Fork Stabilization** (`chore/fork-stabilization`)
 - **M1: Extract Modular Package Structure** (`refactor/modular-package`)
+- **M2: GSC Provider Abstraction** (`refactor/gsc-provider`)
+- **M3: Implement `inspect_url` Tool** (`feat/inspect-url`)
 
 ## Pending Milestones
-- M2: GSC Provider Abstraction (`refactor/gsc-provider`)
-- M3: Implement `inspect_url` Tool (`feat/inspect-url`)
 - M4: SQLite Database Layer (`feat/sqlite-persistence`)
 - M5: Audit Framework and Query Tools (`feat/audit-framework`)
 - M6: CTR Opportunities and Near-Page-One (`feat/search-opportunities`)
@@ -35,15 +35,15 @@ None.
 - Phantom tool references (`inspect_url`, `list_sitemaps`) cleaned up in docs; `list_sitemaps` added as alias for `get_sitemaps`.
 - Pre-existing E2E test failures on Windows (`test_telemetry_events_flow`, `test_first_run_disclosure`) documented as baseline — these fail before any changes due to Windows-specific telemetry timing issues.
 - M1: `gsc_mcp_server.py` converted to a `_ShimModule` subclass (not a plain module) to support `__setattr__` propagation. PEP 562 only added module-level `__getattr__`; test monkeypatching requires `__setattr__` on the type. This is a well-established pattern (used by `lazy_loader`, `importlib.util`, etc.).
-- M1: `searchops/tools/gsc.py` uses module-attribute access (`auth.get_gsc_service()`) rather than bound-name imports to ensure monkeypatching on the shim propagates to call sites.
+- M2: All GSC API calls now go through `GSCProvider` class in `searchops/providers/gsc.py`. Tools no longer call `auth.get_gsc_service()` directly.
+- M3: `inspect_url` uses in-memory quota limiter (default 2,000/day, configurable via `SEARCHOPS_INSPECT_QUOTA_DAILY`). Resets at midnight server time; does not persist across restarts.
 
 ## Known Technical Debt
-- `inspect_url` tool is not implemented (to be addressed in M3). References removed from docs in M0.
 - `gsc_setup_flow.py` still imports `gsc_mcp_server as server` (preserved via shim for backward compatibility).
 
 ## Current Test Status
-- **Post-M1:** 34 passed, 2 failed (pre-existing Windows E2E failures, unchanged from M0 baseline)
-- Unit tests: 28 passed (search analytics: 6, setup flow: 7, updates: 5, imports: 10)
+- **Post-M3:** 59 passed, 2 failed (pre-existing Windows E2E failures, unchanged from M0 baseline)
+- Unit tests: 42 passed (search analytics: 6, setup flow: 7, updates: 5, imports: 12, provider: 14, inspect_url: 7)
 - E2E tests: 6 passed, 2 failed (Windows `Path.home()` doesn't use `HOME` env var — `test_telemetry_events_flow`, `test_first_run_disclosure`)
 
 ## Current Public MCP Tools
@@ -52,12 +52,13 @@ None.
 3. `get_sitemaps` / `list_sitemaps` — List sitemaps
 4. `submit_sitemap` — Submit sitemap
 5. `delete_sitemap` — Delete sitemap
-6. `list_available_dimensions` — Schema discovery
-7. `list_available_metrics` — Schema discovery
-8. `skills_list` — List playbooks
-9. `skill_read` — Load playbook
-10. `setup_gsc_access` — Interactive setup
-11. `check_for_updates` — Version check
+6. `inspect_url` — URL Inspection API (index status, crawl info, rich results)
+7. `list_available_dimensions` — Schema discovery
+8. `list_available_metrics` — Schema discovery
+9. `skills_list` — List playbooks
+10. `skill_read` — Load playbook
+11. `setup_gsc_access` — Interactive setup
+12. `check_for_updates` — Version check
 
 ## Next Recommended Milestone
-M2: GSC Provider Abstraction (`refactor/gsc-provider`)
+M4: SQLite Database Layer (`feat/sqlite-persistence`)

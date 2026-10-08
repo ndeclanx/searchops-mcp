@@ -26,6 +26,7 @@ BRIEF_CREDS_MISSING = "gsc-creds-missing-v1"
 BRIEF_SITE_UNSET = "gsc-site-unset-v1"
 BRIEF_403_PROPERTY = "gsc-403-property-v1"
 BRIEF_401_INVALID = "gsc-401-invalid-v1"
+BRIEF_INSPECT_QUOTA = "gsc-inspect-quota-v1"
 
 
 def _guided_error(what, steps):

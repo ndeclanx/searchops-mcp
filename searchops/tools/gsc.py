@@ -12,7 +12,7 @@ from typing_extensions import TypedDict
 
 from gsc_telemetry import request_supports_elicitation
 from searchops import errors
-from searchops.providers import gsc_provider
+from searchops.providers import gsc_provider, QuotaExceededError
 from searchops.instrument import instrument, fire_skill_tip, _classify_result
 from searchops.server import mcp, _ANNOTATIONS_READ_API, _ANNOTATIONS_WRITE_API, _ANNOTATIONS_DELETE_API
 
@@ -416,5 +416,71 @@ async def get_search_analytics(
                 result = await anyio.to_thread.run_sync(call)
     except Exception:
         pass
+
+    return result
+
+
+# ---------------------------------------------------------------------------
+# URL Inspection
+# ---------------------------------------------------------------------------
+@mcp.tool(annotations=_ANNOTATIONS_READ_API)
+@instrument
+def inspect_url(url: str, site_url: str | None = None) -> dict:
+    """
+    Inspect a URL's index status via the Google URL Inspection API.
+
+    Args:
+        url: The fully-qualified URL to inspect (must belong to the property).
+        site_url: GSC property URL. Defaults to the configured GSC_SITE_URL.
+
+    Returns:
+        Index status, coverage state, crawl info, and rich results for the URL.
+    """
+    if errors.SERVER_INIT_ERROR:
+        return f"Configuration Error: {errors.SERVER_INIT_ERROR}. Please instruct the user to fix their setup."
+
+    target_site = (site_url or errors.GSC_SITE_URL or "").strip()
+    if not target_site:
+        return {"error": "No site_url provided and GSC_SITE_URL is not configured."}
+
+    try:
+        raw = gsc_provider.inspect_url(target_site, url)
+    except QuotaExceededError as e:
+        errors._set_brief(errors.BRIEF_INSPECT_QUOTA, "QuotaError")
+        return {"error": str(e)}
+    except Exception as e:
+        brief = errors._api_error_text(e, "inspecting URL")
+        if brief:
+            return {"error": brief}
+        return {"error": f"Error inspecting URL: {str(e)}"}
+
+    # Extract and structure the inspectionResult
+    inspection = raw.get("inspectionResult", {})
+    index_status = inspection.get("indexStatusResult", {})
+    rich_results = inspection.get("richResultsResult")
+    amp_result = inspection.get("ampResult")
+
+    result = {
+        "inspected_url": url,
+        "site_url": target_site,
+        "index_status": {
+            "verdict": index_status.get("verdict"),
+            "coverage_state": index_status.get("coverageState"),
+            "robots_txt_state": index_status.get("robotsTxtState"),
+            "indexing_state": index_status.get("indexingState"),
+            "last_crawl_time": index_status.get("lastCrawlTime"),
+            "page_fetch_state": index_status.get("pageFetchState"),
+            "google_canonical": index_status.get("googleCanonical"),
+            "user_canonical": index_status.get("userCanonical"),
+            "crawled_as": index_status.get("crawledAs"),
+            "sitemap": index_status.get("sitemap", []),
+            "referring_urls": index_status.get("referringUrls", []),
+        },
+    }
+
+    if rich_results is not None:
+        result["rich_results"] = rich_results
+    if amp_result is not None:
+        result["amp_inspection"] = amp_result
 
     return result

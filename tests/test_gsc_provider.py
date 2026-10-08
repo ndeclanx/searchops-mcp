@@ -66,7 +66,7 @@ def _install_stubs():
 
 _install_stubs()
 
-from searchops.providers.gsc import GSCProvider  # noqa: E402
+from searchops.providers.gsc import GSCProvider, QuotaExceededError  # noqa: E402
 from searchops.providers import gsc_provider, DataProvider  # noqa: E402
 
 
@@ -164,6 +164,61 @@ class TestGSCProviderSearchAnalytics(unittest.TestCase):
 
         with self.assertRaises(Exception):
             provider.search_analytics("https://a.com/", {})
+
+
+class TestGSCProviderInspectUrl(unittest.TestCase):
+    def setUp(self):
+        self.provider = GSCProvider()
+        self.mock_service = MagicMock()
+        self.provider._get_service = lambda: self.mock_service
+
+    def test_inspect_url_calls_api_with_correct_body(self):
+        self.mock_service.urlInspection.return_value.index.return_value.inspect.return_value.execute.return_value = {
+            "inspectionResult": {"indexStatusResult": {"verdict": "PASS"}}
+        }
+        result = self.provider.inspect_url("https://a.com/", "https://a.com/page")
+
+        self.mock_service.urlInspection.return_value.index.return_value.inspect.assert_called_once_with(
+            body={"inspectionUrl": "https://a.com/page", "siteUrl": "https://a.com/"}
+        )
+        self.assertEqual(result["inspectionResult"]["indexStatusResult"]["verdict"], "PASS")
+
+    def test_inspect_url_quota_exceeded(self):
+        self.provider._inspect_quota_limit = 2
+        self.provider._inspect_count = 0
+        self.mock_service.urlInspection.return_value.index.return_value.inspect.return_value.execute.return_value = {
+            "inspectionResult": {}
+        }
+
+        # First two calls should succeed
+        self.provider.inspect_url("https://a.com/", "https://a.com/p1")
+        self.provider.inspect_url("https://a.com/", "https://a.com/p2")
+
+        # Third call should raise
+        with self.assertRaises(QuotaExceededError):
+            self.provider.inspect_url("https://a.com/", "https://a.com/p3")
+
+    def test_inspect_url_quota_resets_daily(self):
+        from datetime import date
+        self.provider._inspect_quota_limit = 1
+        self.provider._inspect_count = 1
+        self.provider._inspect_date = date(2020, 1, 1)  # old date
+        self.mock_service.urlInspection.return_value.index.return_value.inspect.return_value.execute.return_value = {
+            "inspectionResult": {}
+        }
+
+        # Should succeed because the date has changed
+        self.provider.inspect_url("https://a.com/", "https://a.com/p1")
+        self.assertEqual(self.provider._inspect_count, 1)
+        self.assertEqual(self.provider._inspect_date, date.today())
+
+    def test_inspect_url_increments_counter_after_success(self):
+        self.mock_service.urlInspection.return_value.index.return_value.inspect.return_value.execute.return_value = {
+            "inspectionResult": {}
+        }
+        self.assertEqual(self.provider._inspect_count, 0)
+        self.provider.inspect_url("https://a.com/", "https://a.com/p1")
+        self.assertEqual(self.provider._inspect_count, 1)
 
 
 if __name__ == "__main__":

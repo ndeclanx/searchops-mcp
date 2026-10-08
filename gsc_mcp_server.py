@@ -97,6 +97,7 @@ _ATTR_MAP = {
     "delete_sitemap": "searchops.tools.gsc",
     "_get_search_analytics_impl": "searchops.tools.gsc",
     "get_search_analytics": "searchops.tools.gsc",
+    "inspect_url": "searchops.tools.gsc",
     # searchops.tools.schema
     "load_gsc_dimensions": "searchops.tools.schema",
     "load_gsc_metrics": "searchops.tools.schema",

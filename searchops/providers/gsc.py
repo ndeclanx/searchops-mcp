@@ -9,7 +9,14 @@ Auth, credential management, and the ``reinitialize()`` flow still live in
 
 from __future__ import annotations
 
+import os
+from datetime import date
+
 from searchops import auth, errors
+
+
+class QuotaExceededError(Exception):
+    """Raised when the in-memory daily quota for a resource is exhausted."""
 
 
 class GSCProvider:
@@ -18,6 +25,13 @@ class GSCProvider:
     All methods raise on transport/auth errors — callers (tools) are
     responsible for catching and translating via ``errors._api_error_text``.
     """
+
+    def __init__(self):
+        self._inspect_quota_limit = int(
+            os.getenv("SEARCHOPS_INSPECT_QUOTA_DAILY", "2000")
+        )
+        self._inspect_count = 0
+        self._inspect_date: date | None = None
 
     # ------------------------------------------------------------------
     # Service construction
@@ -70,6 +84,43 @@ class GSCProvider:
         return service.searchanalytics().query(
             siteUrl=site_url, body=body
         ).execute()
+
+    # ------------------------------------------------------------------
+    # URL Inspection
+    # ------------------------------------------------------------------
+    def _check_inspect_quota(self) -> None:
+        """Enforce in-memory daily quota for URL Inspection API calls.
+
+        Resets automatically when the date changes (server-local time).
+        Raises ``QuotaExceededError`` if the daily limit is reached.
+        """
+        today = date.today()
+        if self._inspect_date != today:
+            self._inspect_count = 0
+            self._inspect_date = today
+        if self._inspect_count >= self._inspect_quota_limit:
+            raise QuotaExceededError(
+                f"URL Inspection API daily quota exhausted "
+                f"({self._inspect_quota_limit} calls/day). "
+                f"The quota resets at midnight server time. "
+                f"Adjust with SEARCHOPS_INSPECT_QUOTA_DAILY env var."
+            )
+
+    def inspect_url(self, site_url: str, inspection_url: str) -> dict:
+        """Inspect a URL via the URL Inspection API.
+
+        Returns the raw ``inspectionResult`` from the API response.
+        Raises ``QuotaExceededError`` if the daily limit is reached.
+        """
+        self._check_inspect_quota()
+        service = self._get_service()
+        body = {
+            "inspectionUrl": inspection_url,
+            "siteUrl": site_url,
+        }
+        result = service.urlInspection().index().inspect(body=body).execute()
+        self._inspect_count += 1
+        return result
 
     # ------------------------------------------------------------------
     # Lifecycle

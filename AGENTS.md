@@ -71,8 +71,10 @@ If credentials are not yet configured, guide the human with these steps:
 2. **Dimension Constraints**:
    - Allowed dimensions in `get_search_analytics`: `['query', 'page', 'country', 'device', 'date', 'searchAppearance']`.
    - Max row limit is 25,000. Default to 1,000 to conserve context tokens.
-3. **URL Inspection** (planned):
-   - URL Inspection API has a strict daily quota of 2,000 calls per day. The `inspect_url` tool will be added in a future milestone.
+3. **URL Inspection**:
+   - The `inspect_url` tool calls the Google URL Inspection API. Daily quota is 2,000 calls (configurable via `SEARCHOPS_INSPECT_QUOTA_DAILY`).
+   - Returns: index status verdict, coverage state, robots.txt state, crawl info, canonical URLs, rich results, and AMP status.
+   - Use sparingly — prefer `get_search_analytics` for bulk analysis and reserve `inspect_url` for targeted page-level diagnostics.
 
 ---
 

@@ -53,11 +53,16 @@
 - **Parameters:** None
 - **Note:** Queries PyPI with 24h cache TTL
 
+### `inspect_url`
+- **Type:** Read-only, idempotent, open-world
+- **Parameters:** url (required), site_url (optional, defaults to GSC_SITE_URL)
+- **Quota:** 2,000 calls/day (in-memory, configurable via `SEARCHOPS_INSPECT_QUOTA_DAILY`)
+- **Returns:** Index status verdict, coverage state, robots.txt state, indexing state, crawl info, canonical URLs, rich results, AMP status
+
 ## Future Tools (Planned)
 
 | Tool | Milestone | Purpose |
 |------|-----------|---------|
-| `inspect_url` | M3 | URL Inspection API with quota protection |
 | `get_audit_summary` | M5 | Retrieve audit summary |
 | `get_audit_issues` | M5 | Query audit findings with pagination |
 | `get_issue` | M5 | Single issue with evidence |

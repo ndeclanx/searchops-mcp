@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from searchops.providers.gsc import GSCProvider
+from searchops.providers.gsc import GSCProvider, QuotaExceededError
 
 
 @runtime_checkable
