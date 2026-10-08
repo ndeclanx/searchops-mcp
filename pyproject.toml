@@ -55,6 +55,7 @@ only-include = [
     "gsc_metrics.json",
     "gsc_filters.json",
     "skills",
+    "searchops",
 ]
 
 [tool.pytest.ini_options]

@@ -186,13 +186,14 @@ class GetSearchAnalyticsRequestBodyTests(unittest.TestCase):
 
 class SingleRegistrationTest(unittest.TestCase):
     def test_only_one_get_search_analytics_definition(self):
-        with open(os.path.join(REPO_ROOT, "gsc_mcp_server.py")) as f:
+        # After M1 modularization the definition lives in searchops/tools/gsc.py.
+        with open(os.path.join(REPO_ROOT, "searchops", "tools", "gsc.py")) as f:
             src = f.read()
         self.assertEqual(
             src.count("def get_search_analytics("),
             1,
             "get_search_analytics must be defined exactly once "
-            "(FastMCP silently overwrites duplicate tool registrations).",
+            "(MCPServer silently overwrites duplicate tool registrations).",
         )
 
 

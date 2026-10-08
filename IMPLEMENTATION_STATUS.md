@@ -1,16 +1,16 @@
 # Implementation Status — SearchOps MCP
 
 ## Current Phase
-**Phase 0 — Fork Stabilization** (COMPLETE)
+**Phase 1 — Controlled Refactoring** (IN PROGRESS)
 
 ## Current Milestone
-**Milestone 0: Fork Stabilization** (`chore/fork-stabilization`) — COMPLETE
+**Milestone 1: Extract Modular Package Structure** (`refactor/modular-package`) — COMPLETE
 
 ## Completed Milestones
 - **M0: Fork Stabilization** (`chore/fork-stabilization`)
+- **M1: Extract Modular Package Structure** (`refactor/modular-package`)
 
 ## Pending Milestones
-- M1: Extract Modular Package Structure (`refactor/modular-package`)
 - M2: GSC Provider Abstraction (`refactor/gsc-provider`)
 - M3: Implement `inspect_url` Tool (`feat/inspect-url`)
 - M4: SQLite Database Layer (`feat/sqlite-persistence`)
@@ -34,15 +34,16 @@ None.
 - Telemetry flipped to opt-in (disabled by default) per PRD requirement.
 - Phantom tool references (`inspect_url`, `list_sitemaps`) cleaned up in docs; `list_sitemaps` added as alias for `get_sitemaps`.
 - Pre-existing E2E test failures on Windows (`test_telemetry_events_flow`, `test_first_run_disclosure`) documented as baseline — these fail before any changes due to Windows-specific telemetry timing issues.
+- M1: `gsc_mcp_server.py` converted to a `_ShimModule` subclass (not a plain module) to support `__setattr__` propagation. PEP 562 only added module-level `__getattr__`; test monkeypatching requires `__setattr__` on the type. This is a well-established pattern (used by `lazy_loader`, `importlib.util`, etc.).
+- M1: `searchops/tools/gsc.py` uses module-attribute access (`auth.get_gsc_service()`) rather than bound-name imports to ensure monkeypatching on the shim propagates to call sites.
 
 ## Known Technical Debt
-- `gsc_mcp_server.py` is a ~1,370-line monolith (to be addressed in M1).
 - `inspect_url` tool is not implemented (to be addressed in M3). References removed from docs in M0.
-- Circular import: `gsc_setup_flow.py` imports `gsc_mcp_server as server`.
+- `gsc_setup_flow.py` still imports `gsc_mcp_server as server` (preserved via shim for backward compatibility).
 
 ## Current Test Status
-- **Post-M0:** 24 passed, 2 failed (pre-existing Windows E2E failures, unchanged from baseline)
-- Unit tests: 18 passed (search analytics: 6, setup flow: 7, updates: 5)
+- **Post-M1:** 34 passed, 2 failed (pre-existing Windows E2E failures, unchanged from M0 baseline)
+- Unit tests: 28 passed (search analytics: 6, setup flow: 7, updates: 5, imports: 10)
 - E2E tests: 6 passed, 2 failed (Windows `Path.home()` doesn't use `HOME` env var — `test_telemetry_events_flow`, `test_first_run_disclosure`)
 
 ## Current Public MCP Tools
@@ -59,4 +60,4 @@ None.
 11. `check_for_updates` — Version check
 
 ## Next Recommended Milestone
-M1: Extract Modular Package Structure (`refactor/modular-package`)
+M2: GSC Provider Abstraction (`refactor/gsc-provider`)
