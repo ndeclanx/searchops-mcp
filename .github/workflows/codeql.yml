@@ -14,6 +14,11 @@ permissions:
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
+    # Code scanning must be enabled on the repository for SARIF upload.
+    # Skipped on forks where it is not yet configured. To re-enable on the
+    # fork: enable GitHub Advanced Security / code scanning in repo settings,
+    # then remove this condition.
+    if: github.repository == 'surendranb/google-search-console-mcp'
     runs-on: ubuntu-latest
     permissions:
       security-events: write
