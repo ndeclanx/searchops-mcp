@@ -1,19 +1,19 @@
 # Implementation Status — SearchOps MCP
 
 ## Current Phase
-**Phase 2 — Missing GSC Features** (IN PROGRESS)
+**Phase 3 — Persistence Layer** (IN PROGRESS)
 
 ## Current Milestone
-**Milestone 3: Implement `inspect_url` Tool** (`feat/inspect-url`) — COMPLETE
+**Milestone 4: SQLite Database Layer** (`feat/sqlite-persistence`) — COMPLETE
 
 ## Completed Milestones
 - **M0: Fork Stabilization** (`chore/fork-stabilization`)
 - **M1: Extract Modular Package Structure** (`refactor/modular-package`)
 - **M2: GSC Provider Abstraction** (`refactor/gsc-provider`)
 - **M3: Implement `inspect_url` Tool** (`feat/inspect-url`)
+- **M4: SQLite Database Layer** (`feat/sqlite-persistence`)
 
 ## Pending Milestones
-- M4: SQLite Database Layer (`feat/sqlite-persistence`)
 - M5: Audit Framework and Query Tools (`feat/audit-framework`)
 - M6: CTR Opportunities and Near-Page-One (`feat/search-opportunities`)
 - M7: Traffic Decay Detection (`feat/traffic-decay`)
@@ -37,6 +37,7 @@ None.
 - M1: `gsc_mcp_server.py` converted to a `_ShimModule` subclass (not a plain module) to support `__setattr__` propagation. PEP 562 only added module-level `__getattr__`; test monkeypatching requires `__setattr__` on the type. This is a well-established pattern (used by `lazy_loader`, `importlib.util`, etc.).
 - M2: All GSC API calls now go through `GSCProvider` class in `searchops/providers/gsc.py`. Tools no longer call `auth.get_gsc_service()` directly.
 - M3: `inspect_url` uses in-memory quota limiter (default 2,000/day, configurable via `SEARCHOPS_INSPECT_QUOTA_DAILY`). Resets at midnight server time; does not persist across restarts.
+- M4: SQLite database at `~/.searchops/searchops.db` (override with `SEARCHOPS_DB_PATH`). WAL mode, forward-only migrations, lazy initialization (DB file not created until first tool that needs it).
 
 ## Known Technical Debt
 - `gsc_setup_flow.py` still imports `gsc_mcp_server as server` (preserved via shim for backward compatibility).
@@ -61,4 +62,4 @@ None.
 12. `check_for_updates` — Version check
 
 ## Next Recommended Milestone
-M4: SQLite Database Layer (`feat/sqlite-persistence`)
+M5: Audit Framework and Query Tools (`feat/audit-framework`)
