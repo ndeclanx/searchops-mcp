@@ -4,7 +4,7 @@
 **Phase 4 — Analysis Tools** (IN PROGRESS)
 
 ## Current Milestone
-**Milestone 6: CTR Opportunities and Near-Page-One** (`feat/search-opportunities`) — COMPLETE
+**Milestone 7: Traffic Decay Detection** (`feat/traffic-decay`) — COMPLETE
 
 ## Completed Milestones
 - **M0: Fork Stabilization** (`chore/fork-stabilization`)
@@ -14,9 +14,9 @@
 - **M4: SQLite Database Layer** (`feat/sqlite-persistence`)
 - **M5: Audit Framework and Query Tools** (`feat/audit-framework`)
 - **M6: CTR Opportunities and Near-Page-One** (`feat/search-opportunities`)
+- **M7: Traffic Decay Detection** (`feat/traffic-decay`)
 
 ## Pending Milestones
-- M7: Traffic Decay Detection (`feat/traffic-decay`)
 - M8: Cannibalization Detection (`feat/cannibalization`)
 - M9: Crawl Parsers (`feat/crawl-parsers`)
 - M10: Site Crawler (`feat/site-crawler`)
@@ -40,13 +40,14 @@ None.
 - M4: SQLite database at `~/.searchops/searchops.db` (override with `SEARCHOPS_DB_PATH`). WAL mode, forward-only migrations, lazy initialization (DB file not created until first tool that needs it).
 - M5: `AuditManager` in `searchops/audit.py` manages audit lifecycle (create → add findings → complete/fail). Severity filtering returns findings at or above a threshold (e.g. `severity="HIGH"` returns CRITICAL + HIGH). Three read-only MCP tools for querying (`get_audit_summary`, `get_audit_issues`, `get_issue`).
 - M6: `find_search_opportunities` analyzes GSC data and classifies queries into three opportunity types: low-CTR (position < 10, CTR < 2%), near-page-one (position 5-20), citation opportunities (position ≤ 1.5, CTR < 1%). Thresholds are configurable. Analysis logic in `searchops/analyzers/opportunities.py`, MCP tool wrapper in `searchops/tools/opportunities.py`.
+- M7: `detect_traffic_decay_tool` compares two periods of GSC data to find impressions drops (≥20%), position losses (≥2.0), and CTR declines (≥20% relative). Configurable thresholds. Handles disappeared queries as full impressions loss.
 
 ## Known Technical Debt
 - `gsc_setup_flow.py` still imports `gsc_mcp_server as server` (preserved via shim for backward compatibility).
 
 ## Current Test Status
-- **Post-M6:** 126 unit tests passed, 2 E2E failed (pre-existing Windows baseline)
-- Unit tests: 126 passed (search analytics: 6, setup flow: 7, updates: 5, imports: 12, provider: 14, inspect_url: 7, database: 23, audit: 25, opportunities: 28)
+- **Post-M7:** 139 unit tests passed, 2 E2E failed (pre-existing Windows baseline)
+- Unit tests: 139 passed (search analytics: 6, setup flow: 7, updates: 5, imports: 12, provider: 14, inspect_url: 7, database: 23, audit: 25, opportunities: 28, traffic_decay: 13)
 - E2E tests: 6 passed, 2 failed (Windows `Path.home()` doesn't use `HOME` env var — `test_telemetry_events_flow`, `test_first_run_disclosure`)
 
 ## Current Public MCP Tools
@@ -66,6 +67,7 @@ None.
 14. `get_audit_issues` — Query audit findings with pagination
 15. `get_issue` — Single finding with full evidence
 16. `find_search_opportunities` — CTR/near-page-one/citation opportunity detection
+17. `detect_traffic_decay_tool` — Period-over-period traffic decline detection
 
 ## Next Recommended Milestone
-M7: Traffic Decay Detection (`feat/traffic-decay`)
+M8: Cannibalization Detection (`feat/cannibalization`)

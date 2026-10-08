@@ -83,11 +83,16 @@
 - **Note:** Creates an audit with findings persisted in SQLite. Query results via `get_audit_issues`.
 - **Opportunity types:** low-ctr (pos < 10, CTR < 2%), near-page-one (pos 5-20), citation-opportunity (pos ≤ 1.5, CTR < 1%)
 
+### `detect_traffic_decay_tool`
+- **Type:** Read-only (GSC API), idempotent, open-world
+- **Parameters:** site_url, current_start, current_end, baseline_start, baseline_end, comparison_days (14), row_limit, impressions_decline_pct (20), position_decline (2.0)
+- **Returns:** Summary with audit_id, total_decays, per-type counts, queries_compared
+- **Decay types:** impressions-declined (≥20% drop), position-declined (≥2.0 worsening), ctr-declined (≥20% relative drop)
+
 ## Future Tools (Planned)
 
 | Tool | Milestone | Purpose |
 |------|-----------|---------|
-| `detect_traffic_decay` | M7 | Period-over-period decline detection |
 | `detect_cannibalization` | M8 | Multi-page query overlap |
 | `analyze_robots_txt` | M9 | Parse robots.txt |
 | `parse_sitemap` | M9 | Parse XML sitemaps |
