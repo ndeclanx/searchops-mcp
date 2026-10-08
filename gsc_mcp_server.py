@@ -116,6 +116,8 @@ _ATTR_MAP = {
     "find_search_opportunities": "searchops.tools.opportunities",
     # searchops.tools.traffic_decay
     "detect_traffic_decay_tool": "searchops.tools.traffic_decay",
+    # searchops.tools.cannibalization
+    "detect_cannibalization_tool": "searchops.tools.cannibalization",
     # searchops.prompts
     "analyze_brand_visibility": "searchops.prompts",
     "content_opportunities": "searchops.prompts",

@@ -4,7 +4,7 @@
 **Phase 4 — Analysis Tools** (IN PROGRESS)
 
 ## Current Milestone
-**Milestone 7: Traffic Decay Detection** (`feat/traffic-decay`) — COMPLETE
+**Milestone 8: Cannibalization Detection** (`feat/cannibalization`) — COMPLETE
 
 ## Completed Milestones
 - **M0: Fork Stabilization** (`chore/fork-stabilization`)
@@ -15,9 +15,9 @@
 - **M5: Audit Framework and Query Tools** (`feat/audit-framework`)
 - **M6: CTR Opportunities and Near-Page-One** (`feat/search-opportunities`)
 - **M7: Traffic Decay Detection** (`feat/traffic-decay`)
+- **M8: Cannibalization Detection** (`feat/cannibalization`)
 
 ## Pending Milestones
-- M8: Cannibalization Detection (`feat/cannibalization`)
 - M9: Crawl Parsers (`feat/crawl-parsers`)
 - M10: Site Crawler (`feat/site-crawler`)
 - M11: Indexing Intelligence (`feat/indexing-intelligence`)
@@ -41,6 +41,7 @@ None.
 - M5: `AuditManager` in `searchops/audit.py` manages audit lifecycle (create → add findings → complete/fail). Severity filtering returns findings at or above a threshold (e.g. `severity="HIGH"` returns CRITICAL + HIGH). Three read-only MCP tools for querying (`get_audit_summary`, `get_audit_issues`, `get_issue`).
 - M6: `find_search_opportunities` analyzes GSC data and classifies queries into three opportunity types: low-CTR (position < 10, CTR < 2%), near-page-one (position 5-20), citation opportunities (position ≤ 1.5, CTR < 1%). Thresholds are configurable. Analysis logic in `searchops/analyzers/opportunities.py`, MCP tool wrapper in `searchops/tools/opportunities.py`.
 - M7: `detect_traffic_decay_tool` compares two periods of GSC data to find impressions drops (≥20%), position losses (≥2.0), and CTR declines (≥20% relative). Configurable thresholds. Handles disappeared queries as full impressions loss.
+- M8: `detect_cannibalization_tool` finds queries ranking on 2+ pages from the same site. Groups by query, identifies best page by CTR, flags CTR spread. Severity scales with page count and spread.
 
 ## Known Technical Debt
 - `gsc_setup_flow.py` still imports `gsc_mcp_server as server` (preserved via shim for backward compatibility).
@@ -68,6 +69,7 @@ None.
 15. `get_issue` — Single finding with full evidence
 16. `find_search_opportunities` — CTR/near-page-one/citation opportunity detection
 17. `detect_traffic_decay_tool` — Period-over-period traffic decline detection
+18. `detect_cannibalization_tool` — Multi-page keyword cannibalization detection
 
 ## Next Recommended Milestone
-M8: Cannibalization Detection (`feat/cannibalization`)
+M9: Crawl Parsers (`feat/crawl-parsers`)

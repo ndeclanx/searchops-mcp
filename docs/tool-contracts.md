@@ -89,11 +89,16 @@
 - **Returns:** Summary with audit_id, total_decays, per-type counts, queries_compared
 - **Decay types:** impressions-declined (≥20% drop), position-declined (≥2.0 worsening), ctr-declined (≥20% relative drop)
 
+### `detect_cannibalization_tool`
+- **Type:** Read-only (GSC API), idempotent, open-world
+- **Parameters:** site_url, start_date, end_date, row_limit (5000), min_pages (2)
+- **Returns:** Summary with audit_id, queries_affected, rows_analyzed
+- **Note:** Severity scales with page count (≥4=HIGH) and CTR spread (≥5%=HIGH)
+
 ## Future Tools (Planned)
 
 | Tool | Milestone | Purpose |
 |------|-----------|---------|
-| `detect_cannibalization` | M8 | Multi-page query overlap |
 | `analyze_robots_txt` | M9 | Parse robots.txt |
 | `parse_sitemap` | M9 | Parse XML sitemaps |
 | `crawl_site` | M10 | Site crawling |

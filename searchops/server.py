@@ -81,6 +81,7 @@ import searchops.tools.updates   # noqa: E402,F401
 import searchops.tools.audit     # noqa: E402,F401
 import searchops.tools.opportunities  # noqa: E402,F401
 import searchops.tools.traffic_decay  # noqa: E402,F401
+import searchops.tools.cannibalization  # noqa: E402,F401
 import searchops.prompts         # noqa: E402,F401
 import searchops.resources       # noqa: E402,F401
 
