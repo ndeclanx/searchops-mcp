@@ -95,12 +95,22 @@
 - **Returns:** Summary with audit_id, queries_affected, rows_analyzed
 - **Note:** Severity scales with page count (≥4=HIGH) and CTR spread (≥5%=HIGH)
 
+### `analyze_robots_txt`
+- **Type:** Read-only, idempotent, open-world
+- **Parameters:** site_url (optional, defaults to GSC_SITE_URL)
+- **Returns:** Parsed directives, user-agents, disallow/allow counts, sitemap references, findings
+- **Note:** Fetches robots.txt via HTTP, creates audit if issues found
+
+### `parse_sitemap`
+- **Type:** Read-only, idempotent, open-world
+- **Parameters:** sitemap_url (required), site_url (optional)
+- **Returns:** Parsed URLs or child sitemaps, type (sitemap/sitemapindex), validation findings
+- **Note:** Validates URL count (50k limit), domain mismatches, missing lastmod
+
 ## Future Tools (Planned)
 
 | Tool | Milestone | Purpose |
 |------|-----------|---------|
-| `analyze_robots_txt` | M9 | Parse robots.txt |
-| `parse_sitemap` | M9 | Parse XML sitemaps |
 | `crawl_site` | M10 | Site crawling |
 | `analyze_url` | M10 | Single-page analysis |
 | `audit_indexing` | M11 | Full indexing audit |
