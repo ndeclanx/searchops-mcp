@@ -4,7 +4,7 @@
 **Phase 4 — Analysis Tools** (IN PROGRESS)
 
 ## Current Milestone
-**Milestone 11: Indexing Intelligence** (`feat/indexing-intelligence`) — COMPLETE
+**Milestone 12: Historical Comparison** (`feat/audit-comparison`) — COMPLETE
 
 ## Completed Milestones
 - **M0: Fork Stabilization** (`chore/fork-stabilization`)
@@ -19,9 +19,9 @@
 - **M9: Crawl Parsers** (`feat/crawl-parsers`)
 - **M10: Site Crawler** (`feat/site-crawler`)
 - **M11: Indexing Intelligence** (`feat/indexing-intelligence`)
+- **M12: Historical Comparison** (`feat/audit-comparison`)
 
 ## Pending Milestones
-- M12: Historical Comparison (`feat/audit-comparison`)
 - M13: PageSpeed Integration (`feat/pagespeed`)
 - M14: Verification Tool (`feat/verification`)
 - M15: SearchOps Hermes Skill (`feat/searchops-skill`)
@@ -45,13 +45,14 @@ None.
 - M9: `analyze_robots_txt` fetches and parses robots.txt using stdlib, flags issues (blocks-all, static-assets-blocked, missing sitemap, syntax errors). `parse_sitemap` parses XML sitemaps/sitemapindex, validates URL count, domain mismatches, missing lastmod. Both use stdlib only (no external HTTP lib).
 - M10: `crawl_site` is a BFS crawler that follows internal links, respects robots.txt, stores pages/links in SQLite. `analyze_url` analyzes a single URL for SEO issues (missing title, meta desc, H1, thin content). HTML parsed via stdlib `html.parser`.
 - M11: `audit_indexing` checks indexing status of URLs via GSC URL Inspection API. Accepts explicit URL list or crawl_audit_id from a previous crawl. Detects not-indexed, noindex, robots-blocked, canonical mismatches, page fetch issues. Batch-size capped for quota awareness.
+- M12: `compare_audits` diffs two audits to find new, resolved, and persistent findings. Matches by finding_type+url key. Detects severity changes on persistent findings. Local-only (reads from DB, no API calls).
 
 ## Known Technical Debt
 - `gsc_setup_flow.py` still imports `gsc_mcp_server as server` (preserved via shim for backward compatibility).
 
 ## Current Test Status
-- **Post-M11:** 234 unit tests passed, 2 E2E failed (pre-existing Windows baseline)
-- Unit tests: 234 passed (search analytics: 6, setup flow: 7, updates: 5, imports: 12, provider: 14, inspect_url: 7, database: 23, audit: 25, opportunities: 28, traffic_decay: 13, cannibalization: 11, crawl_parsers: 32, crawler: 30, indexing: 22)
+- **Post-M12:** 247 unit tests passed, 2 E2E failed (pre-existing Windows baseline)
+- Unit tests: 247 passed (search analytics: 6, setup flow: 7, updates: 5, imports: 12, provider: 14, inspect_url: 7, database: 23, audit: 25, opportunities: 28, traffic_decay: 13, cannibalization: 11, crawl_parsers: 32, crawler: 30, indexing: 22, comparison: 13)
 - E2E tests: 6 passed, 2 failed (Windows `Path.home()` doesn't use `HOME` env var — `test_telemetry_events_flow`, `test_first_run_disclosure`)
 
 ## Current Public MCP Tools
@@ -78,6 +79,7 @@ None.
 21. `analyze_url` — Single-page SEO analysis (title, meta, H1, content)
 22. `crawl_site` — BFS site crawler with internal link discovery
 23. `audit_indexing` — URL Inspection API-based indexing audit
+24. `compare_audits` — Audit-to-audit diff (new/resolved/persistent findings)
 
 ## Next Recommended Milestone
-M12: Historical Comparison (`feat/audit-comparison`)
+M13: PageSpeed Integration (`feat/pagespeed`)

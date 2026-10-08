@@ -126,6 +126,8 @@ _ATTR_MAP = {
     "crawl_site": "searchops.tools.crawler",
     # searchops.tools.indexing
     "audit_indexing": "searchops.tools.indexing",
+    # searchops.tools.comparison
+    "compare_audits": "searchops.tools.comparison",
     # searchops.prompts
     "analyze_brand_visibility": "searchops.prompts",
     "content_opportunities": "searchops.prompts",

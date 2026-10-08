@@ -125,10 +125,15 @@
 - **Returns:** Summary with audit_id, urls_checked, indexed_count, not_indexed_count, findings_count
 - **Note:** Uses URL Inspection API (counts against 2,000/day quota). Detects not-indexed, noindex, robots-blocked, canonical mismatches, page fetch issues.
 
+### `compare_audits`
+- **Type:** Read-only, idempotent, local (no API call)
+- **Parameters:** baseline_audit_id (required), current_audit_id (required)
+- **Returns:** Summary with new/resolved/persistent counts, severity breakdowns, detailed finding lists
+- **Note:** Matches findings by finding_type+url. Detects severity changes on persistent findings.
+
 ## Future Tools (Planned)
 
 | Tool | Milestone | Purpose |
 |------|-----------|---------|
-| `compare_audits` | M12 | Audit-to-audit diff |
 | `analyze_performance` | M13 | PageSpeed Insights |
 | `verify_issue` | M14 | Issue fix verification |
