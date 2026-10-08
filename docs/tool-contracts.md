@@ -119,11 +119,16 @@
 - **Returns:** Summary with audit_id, pages_crawled, links_found, findings_count
 - **Note:** BFS crawler, stores pages/links in SQLite, detects orphan pages
 
+### `audit_indexing`
+- **Type:** Read-only, idempotent, open-world
+- **Parameters:** site_url (optional), urls (optional list), crawl_audit_id (optional), batch_size (default 50, max 500)
+- **Returns:** Summary with audit_id, urls_checked, indexed_count, not_indexed_count, findings_count
+- **Note:** Uses URL Inspection API (counts against 2,000/day quota). Detects not-indexed, noindex, robots-blocked, canonical mismatches, page fetch issues.
+
 ## Future Tools (Planned)
 
 | Tool | Milestone | Purpose |
 |------|-----------|---------|
-| `audit_indexing` | M11 | Full indexing audit |
 | `compare_audits` | M12 | Audit-to-audit diff |
 | `analyze_performance` | M13 | PageSpeed Insights |
 | `verify_issue` | M14 | Issue fix verification |
