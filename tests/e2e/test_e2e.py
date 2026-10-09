@@ -327,7 +327,8 @@ async def test_protocol_surfaces_legacy_era(tmp_path):
                 prompts = (await session.list_prompts()).prompts
                 prompt_names = {p.name for p in prompts}
                 assert prompt_names == {
-                    "analyze-brand-visibility", "content-opportunities", "diagnose-traffic-drop"}
+                    "analyze-brand-visibility", "content-opportunities", "diagnose-traffic-drop",
+                    "site-health-diagnostic"}
                 got = await session.get_prompt("analyze-brand-visibility", {"brand_terms": "acme"})
                 assert "brand_visibility.md" in got.messages[0].content.text
                 assert "acme" in got.messages[0].content.text
